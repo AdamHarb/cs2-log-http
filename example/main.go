@@ -15,7 +15,7 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Hello!"})
 	})
-	log.Panicf("Failed to listen port 3090 : %v\n", r.Run("0.0.0.0:3090"))
+	log.Panicf("Failed to listen port 3090 : %v\n", r.Run())
 }
 
 func messageHandler(ip string, id string, msg cs2log.Message) error {
