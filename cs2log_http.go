@@ -2,6 +2,7 @@ package cs2loghttp
 
 import (
 	"bufio"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -33,6 +34,7 @@ type LogHandler struct {
 func (l *LogHandler) Handle() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
+		log.Printf("New connection received for server ID: %s", id)
 
 		raw, err := c.GetRawData()
 		if err != nil {
