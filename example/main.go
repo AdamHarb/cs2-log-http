@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"net"
 	"os"
@@ -12,10 +11,6 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		return
-	}
 	r := gin.Default()
 	logHandler := cs2loghttp.NewLogHandler(messageHandler)
 	r.POST("/servers/:id/log", logHandler.Handle())
