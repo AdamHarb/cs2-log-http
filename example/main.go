@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net"
 	"os"
 
 	cs2loghttp "github.com/FlowingSPDG/cs2-log-http"
@@ -20,33 +19,8 @@ func main() {
 
 	port := os.Getenv("PORT")
 
-	externalIP, err := getExternalIP()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Server is running on http://%s:%s", externalIP, port)
-
-	err = r.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func getExternalIP() (string, error) {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
-	if err != nil {
-		return "", err
-	}
-	defer func(conn net.Conn) {
-		err := conn.Close()
-		if err != nil {
-
-		}
-	}(conn)
-
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	return localAddr.IP.String(), nil
+	log.Printf("Server is running on http://0.0.0.0:%s", port)
+	log.Panicf("Failed to listen port 3090 : %v\n", r.Run("0.0.0.0:"+port))
 }
 
 func messageHandler(ip string, id string, msg cs2log.Message) error {
