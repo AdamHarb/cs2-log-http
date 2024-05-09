@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"os"
 
 	cs2loghttp "github.com/FlowingSPDG/cs2-log-http"
@@ -19,8 +21,34 @@ func main() {
 
 	port := os.Getenv("PORT")
 
-	log.Printf("Server is running on http://0.0.0.0:%s", port)
-	log.Panicf("Failed to listen port 3090 : %v\n", r.Run("0.0.0.0:"+port))
+	ip, err := getServerIP()
+	if err != nil {
+		log.Fatalf("Failed to get server IP: %v", err)
+	}
+
+	log.Printf("Server is running on http://%s:%s", ip, port)
+
+	err = r.Run("0.0.0.0:" + port)
+	if err != nil {
+		log.Fatalf("Failed to listen on port %s: %v", port, err)
+	}
+}
+
+func getServerIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, addr := range addrs {
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no valid IP address found")
 }
 
 func messageHandler(ip string, id string, msg cs2log.Message) error {
