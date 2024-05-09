@@ -1,7 +1,10 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"log"
+	"net"
+	"os"
 
 	cs2loghttp "github.com/FlowingSPDG/cs2-log-http"
 	"github.com/gin-gonic/gin"
@@ -9,13 +12,46 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		return
+	}
 	r := gin.Default()
 	logHandler := cs2loghttp.NewLogHandler(messageHandler)
 	r.POST("/servers/:id/log", logHandler.Handle())
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Hello!"})
 	})
-	log.Panicf("Failed to listen port 3090 : %v\n", r.Run())
+
+	port := os.Getenv("PORT")
+
+	externalIP, err := getExternalIP()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Server is running on http://%s:%s", externalIP, port)
+
+	err = r.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func getExternalIP() (string, error) {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return "", err
+	}
+	defer func(conn net.Conn) {
+		err := conn.Close()
+		if err != nil {
+
+		}
+	}(conn)
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	return localAddr.IP.String(), nil
 }
 
 func messageHandler(ip string, id string, msg cs2log.Message) error {
